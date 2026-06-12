@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OceanShop - ร้านขายรหัสเกมอัตโนมัติ</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <div class="logo">🔥 OceanShop</div>
+        <nav>
+            <a href="#" onclick="showSection('shop')">🛒 หน้าร้านค้า</a>
+            <a href="#" onclick="showSection('topup')">💵 เติมเงินอั่งเปา</a>
+            <div class="user-wallet">กระเป๋าเงิน: <span id="balance">0</span> ฿</div>
+        </nav>
+    </header>
+
+    <div class="announcement">
+        📢 ข้อควรระวัง: ก่อนซื้อรหัสกรุณาตรวจสอบเครดิต และอัดวิดีโอก่อนเปิดกล่องสินค้าทุกครั้งเพื่อใช้ในการเคลม!
+    </div>
+
+    <section id="shop-section" class="container">
+        <div class="warning-box">
+            <h3>⚠️ ข้อควรระวังก่อนเลือกซื้อสินค้า</h3>
+            <ul>
+                <li>โปรดตรวจสอบว่ายอดเงินในเว็บ (เครดิต) มีเพียงพอกับราคาสินค้า</li>
+                <li>หลังจากกดซื้อ ระบบจะแสดงไอดีและรหัสผ่านทันที กรุณาเปลี่ยนรหัสผ่านและผูกอีเมลของตนเองทันที</li>
+                <li><strong>สำคัญมาก:</strong> กรุณาถ่ายวิดีโอหน้าจอตั้งแต่กดซื้อ จนถึงขั้นตอนการเข้าเช็ครหัสในเกม เพื่อใช้เป็นหลักฐานหากรหัสมีปัญหา (หากไม่มีวิดีโอ ทางร้านไม่รับเคลมทุกกรณี)</li>
+            </ul>
+        </div>
+
+        <h2 class="section-title">รายการรหัส Roblox [Survive Zombie Arena]</h2>
+        <div class="shop-grid">
+            
+            <div class="product-card" id="prod-1">
+                <div class="badge stock-badge">คลังคงเหลือ: <span id="stock-1">5</span> ชิ้น</div>
+                <img src="https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=400" alt="Roblox" class="product-img">
+                <div class="product-info">
+                    <h3>Survive Zombie Arena รหัสเงิน</h3>
+                    <p class="details">รายละเอียด: รหัสฟาร์มเงินในแมพเยอะ พร้อมเงินติดตัวสำหรับตั้งตัว ซื้อปืนและอัปเกรดได้ทันที</p>
+                    <div class="price-row">
+                        <span class="price">10 ฿</span>
+                        <button class="buy-btn" onclick="buyProduct(1, 'Survive Zombie Arena รหัสเงิน', 10)">ซื้อรหัสนี้</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-card" id="prod-2">
+                <div class="badge stock-badge">คลังคงเหลือ: <span id="stock-2">5</span> ชิ้น</div>
+                <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=400" alt="Roblox Items" class="product-img">
+                <div class="product-info">
+                    <h3>Survive Zombie Arena รหัสของ</h3>
+                    <p class="details">รายละเอียด: มีอาวุธ ไอเทมแรร์ และอุปกรณ์ป้องกันระดับสูงในกระเป๋าครบครัน ไม่ต้องเสียเวลาหาเอง</p>
+                    <div class="price-row">
+                        <span class="price">40 ฿</span>
+                        <button class="buy-btn" onclick="buyProduct(2, 'Survive Zombie Arena รหัสของ', 40)">ซื้อรหัสนี้</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-card" id="prod-3">
+                <div class="badge stock-badge">คลังคงเหลือ: <span id="stock-3">5</span> ชิ้น</div>
+                <img src="https://images.unsplash.com/photo-1538481199705-c710c4e965fc?q=80&w=400" alt="Roblox Class" class="product-img">
+                <div class="product-info">
+                    <h3>Survive Zombie Arena รหัสคลาส</h3>
+                    <p class="details">รายละเอียด: ปลดล็อกคลาสตัวละครระดับ VIP /สเตตัสสูง ความสามารถพิเศษโหด ลุยซอมบี้ได้ทุกด่าน</p>
+                    <div class="price-row">
+                        <span class="price">20 ฿</span>
+                        <button class="buy-btn" onclick="buyProduct(3, 'Survive Zombie Arena รหัสคลาส', 20)">ซื้อรหัสนี้</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="topup-section" class="container d-none">
+        <h2 class="section-title">ระบบเติมเงินผ่านซองของขวัญ TrueMoney Wallet</h2>
+        <div class="topup-box">
+            <img src="https://www.truemoney.com/wp-content/uploads/2020/12/truemoneywallet-logo-20201211.png" alt="TrueMoney" class="truemoney-logo" style="width: 160px; margin-bottom: 15px;">
+            <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">สร้างซองมูลค่าเท่าไหร่ ระบบจะเติมเครดิตให้ตามจำนวนเงินในซองจริงนั้น ๆ</p>
+            
+            <div class="input-group">
+                <label for="truemoney-link">1. วางลิงก์ซองของขวัญอั่งเปา</label>
+                <input type="text" id="truemoney-link" placeholder="https://gift.truemoney.com/campaign/?v=xxxxxxx">
+            </div>
+
+            <div class="input-group">
+                <label for="truemoney-amount">2. ระบุจำนวนเงินในซอง (บาท)</label>
+                <input type="number" id="truemoney-amount" placeholder="ตัวอย่าง: 50" min="1">
+            </div>
+            
+            <button class="submit-topup-btn" onclick="processTopup()">ตรวจสอบยอดเงินและเพิ่มเครดิต</button>
+            <div id="topup-result" class="result-message"></div>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>
