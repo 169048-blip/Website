@@ -1,4 +1,5 @@
-// 1. นำเข้าระบบเชื่อมต่อ Firebase มาไว้ในนี้โดยตรง
+let userBalance = 0;
+
 const firebaseConfig = {
   apiKey: "AIzaSyCHNRvdVwkiFTyVCL8h8DLrQ6UtP3w0G7c",
   authDomain: "farm-4c384.firebaseapp.com",
@@ -9,11 +10,8 @@ const firebaseConfig = {
   measurementId: "G-T8895S7N77"
 };
 
-// เปิดใช้งานระบบ
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-
-let userBalance = 0;
 
 window.onload = function() {
   updateStockDisplay(1);
