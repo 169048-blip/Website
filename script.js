@@ -1,22 +1,29 @@
 let userBalance = 0;
+let db;
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCHNRvdVwkiFTyVCL8h8DLrQ6UtP3w0G7c",
-  authDomain: "farm-4c384.firebaseapp.com",
-  projectId: "farm-4c384",
-  storageBucket: "farm-4c384.appspot.com",
-  messagingSenderId: "1033838611987",
-  appId: "1:1033838611987:web:2d42ae020360ba70a4f9e6",
-  measurementId: "G-T8895S7N77"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
+// รอให้หน้าเว็บโหลดเสร็จ และให้แน่ใจว่าโหลด Firebase มาครบแล้วค่อยทำงาน
 window.onload = function() {
-  updateStockDisplay(1);
-  updateStockDisplay(2);
-  updateStockDisplay(3);
+  if (typeof firebase !== 'undefined') {
+    const firebaseConfig = {
+      apiKey: "AIzaSyCHNRvdVwkiFTyVCL8h8DLrQ6UtP3w0G7c",
+      authDomain: "farm-4c384.firebaseapp.com",
+      projectId: "farm-4c384",
+      storageBucket: "farm-4c384.appspot.com",
+      messagingSenderId: "1033838611987",
+      appId: "1:1033838611987:web:2d42ae020360ba70a4f9e6",
+      measurementId: "G-T8895S7N77"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+
+    // เริ่มดึงยอดสต็อกสินค้า
+    updateStockDisplay(1);
+    updateStockDisplay(2);
+    updateStockDisplay(3);
+  } else {
+    console.error("Firebase library ยังโหลดไม่สำเร็จ กรุณารีเฟรชหน้าเว็บอีกครั้ง");
+  }
 };
 
 function showSection(section) {
@@ -32,6 +39,7 @@ function showSection(section) {
 }
 
 function updateStockDisplay(productId) {
+  if (!db) return;
   db.collection("accounts")
     .where("productid", "==", productId)
     .where("status", "==", "available")
@@ -49,6 +57,10 @@ function updateStockDisplay(productId) {
 }
 
 function buyProduct(productId, productName, price) {
+  if (!db) {
+    alert("ระบบฐานข้อมูลยังไม่พร้อมใช้งาน กรุณารีเฟรชหน้าเว็บ");
+    return;
+  }
   if (userBalance < price) {
     alert(`❌ ยอดเงินของคุณไม่เพียงพอ!\nสินค้านี้ราคา ${price} ฿\nแต่คุณมีเงินในระบบเพียง ${userBalance} ฿`);
     return;
@@ -86,7 +98,9 @@ function buyProduct(productId, productName, price) {
     });
 }
 
+// ระบบเติมเงินอั่งเปา
 function processTopup() {
+  if (!db) return;
   const linkInput = document.getElementById('truemoney-link').value.trim();
   const amountInput = document.getElementById('truemoney-amount').value;
   const resultDiv = document.getElementById('topup-result');
