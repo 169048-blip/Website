@@ -1,29 +1,29 @@
-// 1. รหัสกุญแจเชื่อมต่อเข้าฐานข้อมูล Firebase (อัปเดตถูกต้องตามหน้าโปรเจกต์ของคุณแล้ว)
+// 1. กำหนดค่าการเชื่อมต่อฐานข้อมูล Firebase ของคุณ
 const firebaseConfig = {
   apiKey: "AIzaSyCHNRvdVwkiFTyVCL8h8DLrQ6UtP3w0G7c",
   authDomain: "farm-4c384.firebaseapp.com",
   projectId: "farm-4c384",
   storageBucket: "farm-4c384.appspot.com",
   messagingSenderId: "1033838611987",
-  appId: "1:1033838611987:web:2d42ae020360ba70a4f9e6",  // แก้ไขเป็นตัว a เรียบร้อย
+  appId: "1:1033838611987:web:2d42ae020360ba70a4f9e6",
   measurementId: "G-T8895S7N77"
 };
 
-// เริ่มต้นเปิดระบบฐานข้อมูล
+// เริ่มต้นระบบ Firebase และ Firestore
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// ตัวแปรเก็บจำนวนเงินจำลองในกระเป๋า (เริ่มต้นที่ 0 บาท)
+// ยอดเครดิตจำลองในกระเป๋าเงิน (เริ่มต้นที่ 0 บาท)
 let userBalance = 0;
 
-// เมื่อหน้าเว็บโหลดเสร็จ ให้ดึงจำนวนสต็อกสินค้าจาก Firebase มาแสดงทันที
+// เมื่อหน้าเว็บโหลดสำเร็จ ให้ดึงยอดสต็อกสินค้ามาแสดงผลทันที
 window.onload = function() {
-    updateStockDisplay(1); // รหัสเงิน
-    updateStockDisplay(2); // รหัสของ
-    updateStockDisplay(3); // รหัสคลาส
+    updateStockDisplay(1); // หมวดหมู่ 1: รหัสเงิน
+    updateStockDisplay(2); // หมวดหมู่ 2: รหัสของ
+    updateStockDisplay(3); // หมวดหมู่ 3: รหัสคลาส
 };
 
-// ฟังก์ชันสำหรับสลับหน้าจอ (หน้าร้านค้า / หน้าเติมเงิน)
+// ฟังก์ชันสลับหน้าจอระหว่าง หน้าร้านค้า และ หน้าเติมเงิน
 function showSection(section) {
     const shopSec = document.getElementById('shop-section');
     const topupSec = document.getElementById('topup-section');
@@ -37,7 +37,7 @@ function showSection(section) {
     }
 }
 
-// ฟังก์ชันสำหรับดึงจำนวนสต็อกที่เหลืออยู่จริงมาแสดงบนหน้าเว็บ
+// ฟังก์ชันสำหรับเช็กและดึงจำนวนสินค้าที่ยังไม่ถูกขาย (available) มาอัปเดตบนหน้าเว็บ
 function updateStockDisplay(productId) {
     db.collection("accounts")
       .where("productId", "==", productId)
@@ -52,15 +52,15 @@ function updateStockDisplay(productId) {
       });
 }
 
-// ฟังก์ชันระบบซื้อสินค้า (แยกตามประเภท และตรวจสอบยอดเงิน)
+// ฟังก์ชันระบบซื้อสินค้าและตัดสต็อกอัตโนมัติ
 function buyProduct(productId, productName, price) {
-    // 1. ตรวจสอบว่าเงินในกระเป๋าของลูกค้าพอหรือไม่
+    // ตรวจสอบเงินในกระเป๋า
     if (userBalance < price) {
         alert(`❌ ยอดเงินของคุณไม่เพียงพอ! สินค้านี้ราคา ${price} ฿ แต่คุณมีเพียง ${userBalance} ฿`);
         return;
     }
 
-    // 2. ค้นหารหัสเกมในประเภทสินค้าที่เลือก (productId) และยังไม่ได้ขาย (available)
+    // ค้นหารหัสสินค้าที่พร้อมขาย 1 ตัว
     db.collection("accounts")
       .where("productId", "==", productId)
       .where("status", "==", "available")
@@ -77,18 +77,18 @@ function buyProduct(productId, productName, price) {
               const accountId = doc.id;
               const accountData = doc.data();
 
-              // 3. ทำการล็อกและเปลี่ยนสถานะรหัสในคลังให้เป็น sold ทันทีเพื่อไม่ให้คนอื่นได้ซ้ำ
+              // เปลี่ยนสถานะเป็น sold (ขายแล้ว) ทันที
               db.collection("accounts").doc(accountId).update({
                   status: "sold"
               }).then(() => {
-                  // 4. หักเงินในกระเป๋าของผู้ใช้
+                  // หักเงินผู้ใช้และอัปเดตยอดเงินบนหน้าจอ
                   userBalance -= price;
                   document.getElementById('balance').innerText = userBalance;
                   
-                  // 5. อัปเดตตัวเลขสต็อกคงเหลือบนหน้าเว็บใหม่
+                  // อัปเดตสต็อกสินค้าใหม่
                   updateStockDisplay(productId);
 
-                  // 6. ส่งมอบไอดีและรหัสผ่านให้ลูกค้าเห็น
+                  // ส่งมอบรหัสเกมให้ลูกค้า
                   alert(`🎉 ซื้อสินค้าสำเร็จ!\n\n🎁 สินค้า: ${productName}\n👤 ไอดี (Username): ${accountData.username}\n🔑 รหัสผ่าน (Password): ${accountData.password}\n\n*โปรดอัดวิดีโอและเปลี่ยนรหัสผ่านทันที*`);
               }).catch((err) => {
                   alert("เกิดข้อผิดพลาดในการตัดระบบสต็อก");
@@ -102,13 +102,12 @@ function buyProduct(productId, productName, price) {
       });
 }
 
-// ฟังก์ชันระบบเติมเงินอั่งเปาจำลอง
+// ฟังก์ชันระบบจำลองเติมเงินอั่งเปา TrueMoney Wallet
 function processTopup() {
     const linkInput = document.getElementById('truemoney-link').value.trim();
     const amountInput = document.getElementById('truemoney-amount').value;
     const resultDiv = document.getElementById('topup-result');
 
-    // ตรวจสอบข้อมูลเบื้องต้น
     if (!linkInput.includes("gift.truemoney.com")) {
         resultDiv.style.color = "red";
         resultDiv.innerText = "❌ ลิงก์ซองของขวัญไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง";
@@ -120,11 +119,10 @@ function processTopup() {
         return;
     }
 
-    // ทำงานเพิ่มเงินเข้าสู่กระเป๋าจำลอง
+    // เพิ่มเครดิตเข้ากระเป๋าเงิน
     const amount = parseFloat(amountInput);
     userBalance += amount;
     
-    // อัปเดตเงินในกระเป๋าขึ้นหน้าจอ
     document.getElementById('balance').innerText = userBalance;
     
     resultDiv.style.color = "green";
