@@ -1,7 +1,5 @@
-// 1. ประกาศตัวแปรเงินในระบบไว้บนสุด
 let userBalance = 0;
 
-// 2. ตั้งค่าการเชื่อมต่อ Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyCHNRvdVwkiFTyVCL8h8DLrQ6UtP3w0G7c",
   authDomain: "farm-4c384.firebaseapp.com",
@@ -12,18 +10,15 @@ const firebaseConfig = {
   measurementId: "G-T8895S7N77"
 };
 
-// เปิดใช้งานระบบหลังบ้าน
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// เมื่อเปิดหน้าเว็บ ให้สั่งโหลดสต็อกทันที
 window.onload = function() {
   updateStockDisplay(1);
   updateStockDisplay(2);
   updateStockDisplay(3);
 };
 
-// ฟังก์ชันสลับหน้าเมนู
 function showSection(section) {
   const shopSec = document.getElementById('shop-section');
   const topupSec = document.getElementById('topup-section');
@@ -36,10 +31,9 @@ function showSection(section) {
   }
 }
 
-// 🛒 ฟังก์ชันดึงสต็อก (ปรับมาใช้ productid พิมพ์เล็กตาม Firebase ของคุณแล้ว)
 function updateStockDisplay(productId) {
   db.collection("accounts")
-    .where("productid", "==", productId) // 🔥 แก้จุดนี้เป็นพิมพ์เล็กตรงตามหลังบ้านเป๊ะๆ
+    .where("productid", "==", productId)
     .where("status", "==", "available")
     .get()
     .then((querySnapshot) => {
@@ -54,7 +48,6 @@ function updateStockDisplay(productId) {
     });
 }
 
-// 🛍️ ฟังก์ชันกดซื้อสินค้า (ปรับให้รองรับตัวพิมพ์เล็ก)
 function buyProduct(productId, productName, price) {
   if (userBalance < price) {
     alert(`❌ ยอดเงินของคุณไม่เพียงพอ!\nสินค้านี้ราคา ${price} ฿\nแต่คุณมีเงินในระบบเพียง ${userBalance} ฿`);
@@ -62,7 +55,7 @@ function buyProduct(productId, productName, price) {
   }
 
   db.collection("accounts")
-    .where("productid", "==", productId) // 🔥 แก้จุดนี้เป็นพิมพ์เล็กเหมือนกันครับ
+    .where("productid", "==", productId)
     .where("status", "==", "available")
     .limit(1)
     .get()
@@ -93,7 +86,6 @@ function buyProduct(productId, productName, price) {
     });
 }
 
-// ฟังก์ชันส่งลิงก์ซองอั่งเปาเข้าคิวตรวจสอบ
 function processTopup() {
   const linkInput = document.getElementById('truemoney-link').value.trim();
   const amountInput = document.getElementById('truemoney-amount').value;
