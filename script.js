@@ -1,4 +1,4 @@
-// 1. กำหนดค่าการเชื่อมต่อฐานข้อมูล Firebase ของคุณ
+// กำหนดค่าเชื่อมต่อ Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyCHNRvdVwkiFTyVCL8h8DLrQ6UtP3w0G7c",
   authDomain: "farm-4c384.firebaseapp.com",
@@ -9,21 +9,18 @@ const firebaseConfig = {
   measurementId: "G-T8895S7N77"
 };
 
-// เริ่มต้นระบบ Firebase และ Firestore
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// ยอดเครดิตจำลองในกระเป๋าเงิน (เริ่มต้นที่ 0 บาท)
 let userBalance = 0;
 
-// เมื่อหน้าเว็บโหลดสำเร็จ ให้ดึงยอดสต็อกสินค้ามาแสดงผลทันที
 window.onload = function() {
-    updateStockDisplay(1); // หมวดหมู่ 1: รหัสเงิน
-    updateStockDisplay(2); // หมวดหมู่ 2: รหัสของ
-    updateStockDisplay(3); // หมวดหมู่ 3: รหัสคลาส
+    updateStockDisplay(1);
+    updateStockDisplay(2);
+    updateStockDisplay(3);
 };
 
-// ฟังก์ชันสลับหน้าจอระหว่าง หน้าร้านค้า และ หน้าเติมเงิน
+// ฟังก์ชันสลับหน้าจอ (ถ้ากดเมนูแล้วไม่ไป แสดงว่าฟังก์ชันนี้ไม่ทำงาน)
 function showSection(section) {
     const shopSec = document.getElementById('shop-section');
     const topupSec = document.getElementById('topup-section');
@@ -37,7 +34,6 @@ function showSection(section) {
     }
 }
 
-// ฟังก์ชันสำหรับเช็กและดึงจำนวนสินค้าที่ยังไม่ถูกขาย (available) มาอัปเดตบนหน้าเว็บ
 function updateStockDisplay(productId) {
     db.collection("accounts")
       .where("productId", "==", productId)
@@ -52,22 +48,18 @@ function updateStockDisplay(productId) {
       });
 }
 
-// ฟังก์ชันระบบซื้อสินค้าและตัดสต็อกอัตโนมัติ
 function buyProduct(productId, productName, price) {
-    // ตรวจสอบเงินในกระเป๋า
     if (userBalance < price) {
         alert(`❌ ยอดเงินของคุณไม่เพียงพอ! สินค้านี้ราคา ${price} ฿ แต่คุณมีเพียง ${userBalance} ฿`);
         return;
     }
 
-    // ค้นหารหัสสินค้าที่พร้อมขาย 1 ตัว
     db.collection("accounts")
       .where("productId", "==", productId)
       .where("status", "==", "available")
       .limit(1)
       .get()
       .then((querySnapshot) => {
-          
           if (querySnapshot.empty) {
               alert(`❌ ขออภัยครับ [${productName}] หมดสต็อกแล้ว!`);
               return;
@@ -77,32 +69,24 @@ function buyProduct(productId, productName, price) {
               const accountId = doc.id;
               const accountData = doc.data();
 
-              // เปลี่ยนสถานะเป็น sold (ขายแล้ว) ทันที
               db.collection("accounts").doc(accountId).update({
                   status: "sold"
               }).then(() => {
-                  // หักเงินผู้ใช้และอัปเดตยอดเงินบนหน้าจอ
                   userBalance -= price;
                   document.getElementById('balance').innerText = userBalance;
-                  
-                  // อัปเดตสต็อกสินค้าใหม่
                   updateStockDisplay(productId);
-
-                  // ส่งมอบรหัสเกมให้ลูกค้า
-                  alert(`🎉 ซื้อสินค้าสำเร็จ!\n\n🎁 สินค้า: ${productName}\n👤 ไอดี (Username): ${accountData.username}\n🔑 รหัสผ่าน (Password): ${accountData.password}\n\n*โปรดอัดวิดีโอและเปลี่ยนรหัสผ่านทันที*`);
+                  alert(`🎉 ซื้อสินค้าสำเร็จ!\n\n🎁 สินค้า: ${productName}\n👤 ไอดี: ${accountData.username}\n🔑 รหัสผ่าน: ${accountData.password}`);
               }).catch((err) => {
-                  alert("เกิดข้อผิดพลาดในการตัดระบบสต็อก");
-                  console.error(err);
+                  alert("เกิดข้อผิดพลาดในการตัดสต็อก");
               });
           });
       })
       .catch((error) => {
           alert("ไม่สามารถเชื่อมต่อฐานข้อมูลได้");
-          console.error(error);
       });
 }
 
-// ฟังก์ชันระบบจำลองเติมเงินอั่งเปา TrueMoney Wallet
+// ฟังก์ชันส่งข้อมูลซองเข้าคิวตรวจ (ป้องกันการเสกเงิน)
 function processTopup() {
     const linkInput = document.getElementById('truemoney-link').value.trim();
     const amountInput = document.getElementById('truemoney-amount').value;
@@ -110,25 +94,31 @@ function processTopup() {
 
     if (!linkInput.includes("gift.truemoney.com")) {
         resultDiv.style.color = "red";
-        resultDiv.innerText = "❌ ลิงก์ซองของขวัญไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง";
+        resultDiv.innerText = "❌ ลิงก์ซองของขวัญไม่ถูกต้อง";
         return;
     }
     if (!amountInput || amountInput <= 0) {
         resultDiv.style.color = "red";
-        resultDiv.innerText = "❌ กรุณาระบุจำนวนเงินในซองให้ถูกต้อง";
+        resultDiv.innerText = "❌ กรุณาระบุจำนวนเงินให้ถูกต้อง";
         return;
     }
 
-    // เพิ่มเครดิตเข้ากระเป๋าเงิน
     const amount = parseFloat(amountInput);
-    userBalance += amount;
-    
-    document.getElementById('balance').innerText = userBalance;
-    
-    resultDiv.style.color = "green";
-    resultDiv.innerText = `✅ เติมเงินสำเร็จ! เพิ่มเครดิตจำนวน ${amount} บาท เรียบร้อยแล้ว`;
-    
-    // ล้างช่องกรอกข้อมูล
-    document.getElementById('truemoney-link').value = "";
-    document.getElementById('truemoney-amount').value = "";
+
+    db.collection("topup_requests").add({
+        truemoneyLink: linkInput,
+        amount: amount,
+        status: "pending",
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    })
+    .then(() => {
+        resultDiv.style.color = "orange";
+        resultDiv.innerText = `⏳ ส่งข้อมูลสำเร็จ! จำนวน ${amount} บาท โปรดรอเจ้าของร้านตรวจสอบและอนุมัติเครดิต`;
+        document.getElementById('truemoney-link').value = "";
+        document.getElementById('truemoney-amount').value = "";
+    })
+    .catch((error) => {
+        resultDiv.style.color = "red";
+        resultDiv.innerText = "❌ เกิดข้อผิดพลาด ไม่สามารถส่งข้อมูลได้";
+    });
 }
