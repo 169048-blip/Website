@@ -1,4 +1,7 @@
-// 1. ตั้งค่า Firebase (ตรวจสอบ App ID และ Project ID ของคุณเรียบร้อยแล้ว)
+// 1. ประกาศตัวแปรเงินในระบบไว้บนสุด เพื่อไม่ให้เกิดข้อผิดพลาด Cannot access before initialization
+let userBalance = 0;
+
+// 2. ตั้งค่าการเชื่อมต่อ Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyCHNRvdVwkiFTyVCL8h8DLrQ6UtP3w0G7c",
   authDomain: "farm-4c384.firebaseapp.com",
@@ -9,21 +12,18 @@ const firebaseConfig = {
   measurementId: "G-T8895S7N77"
 };
 
-// เปิดใช้งานระบบ
+// เปิดใช้งานระบบหลังบ้าน
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// ยอดเงินเริ่มต้น
-let userBalance = 0;
-
-// เมื่อโหลดเว็บ ให้ดึงข้อมูลสต็อกมาแสดงผล
+// เมื่อเปิดหน้าเว็บ ให้สั่งโหลดสต็อกทันที
 window.onload = function() {
   updateStockDisplay(1);
   updateStockDisplay(2);
   updateStockDisplay(3);
 };
 
-// ระบบสลับหน้าจอ หน้าร้านค้า / เติมเงิน
+// ฟังก์ชันสลับหน้าเมนู
 function showSection(section) {
   const shopSec = document.getElementById('shop-section');
   const topupSec = document.getElementById('topup-section');
@@ -36,7 +36,7 @@ function showSection(section) {
   }
 }
 
-// ระบบดึงสต็อกสินค้าจากตู้บัญชี accounts
+// ฟังก์ชันดึงจำนวนสต็อกสินค้าจาก Firebase
 function updateStockDisplay(productId) {
   db.collection("accounts")
     .where("productId", "==", productId)
@@ -54,15 +54,15 @@ function updateStockDisplay(productId) {
     });
 }
 
-// ระบบปุ่มกดซื้อสินค้า (เมื่อกดแล้วจะเช็กยอดเงินทันที)
+// ฟังก์ชันเมื่อกดปุ่มซื้อรหัสสินค้า
 function buyProduct(productId, productName, price) {
-  // บรรทัดนี้จะทำงานทันทีที่กดปุ่ม เพื่อเช็กเงินในกระเป๋าของคุณก่อน
+  // ตรวจเช็กเงินในกระเป๋าก่อน
   if (userBalance < price) {
     alert(`❌ ยอดเงินของคุณไม่เพียงพอ!\nสินค้านี้ราคา ${price} ฿\nแต่คุณมีเงินในระบบเพียง ${userBalance} ฿`);
     return;
   }
 
-  // ค้นหาสินค้าในคลัง
+  // ค้นหารหัสเกมในตู้คลังข้อมูล accounts
   db.collection("accounts")
     .where("productId", "==", productId)
     .where("status", "==", "available")
@@ -78,27 +78,25 @@ function buyProduct(productId, productName, price) {
         const accountId = doc.id;
         const accountData = doc.data();
 
-        // สั่งเปลี่ยนสถานะเป็น sold
+        // เปลี่ยนสถานะสินค้าเป็นขายแล้ว
         db.collection("accounts").doc(accountId).update({
           status: "sold"
         }).then(() => {
           userBalance -= price;
           document.getElementById('balance').innerText = userBalance;
           updateStockDisplay(productId);
-          alert(`🎉 ซื้อสินค้าสำเร็จ!\n\n🎁 สินค้า: ${productName}\n👤 ไอดี (Username): ${accountData.username}\n🔑 รหัสผ่าน (Password): ${accountData.password}`);
+          alert(`🎉 ซื้อสินค้าสำเร็จ!\n\n🎁 สินค้า: ${productName}\n👤 ไอดี: ${accountData.username}\n🔑 รหัสผ่าน: ${accountData.password}`);
         }).catch((err) => {
-          alert("เกิดข้อผิดพลาดในการตัดยอดคลังสินค้า");
-          console.error(err);
+          alert("เกิดข้อผิดพลาดในการตัดยอดสต็อก");
         });
       });
     })
     .catch((error) => {
-      alert("ไม่สามารถเชื่อมต่อระบบคลังข้อมูลได้ในขณะนี้");
-      console.error(error);
+      alert("ไม่สามารถเชื่อมต่อฐานข้อมูลคลังสินค้าได้");
     });
 }
 
-// ระบบรับซองแจ้งเติมเงินไปเก็บในตู้ข้อมูลหลังบ้าน เพื่อความปลอดภัย
+// ฟังก์ชันส่งลิงก์ซองอั่งเปาเข้าคิวตรวจสอบ
 function processTopup() {
   const linkInput = document.getElementById('truemoney-link').value.trim();
   const amountInput = document.getElementById('truemoney-amount').value;
@@ -106,12 +104,12 @@ function processTopup() {
 
   if (!linkInput.includes("gift.truemoney.com")) {
     resultDiv.style.color = "red";
-    resultDiv.innerText = "❌ ลิงก์ซองของขวัญไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง";
+    resultDiv.innerText = "❌ ลิงก์ซองของขวัญไม่ถูกต้อง";
     return;
   }
   if (!amountInput || amountInput <= 0) {
     resultDiv.style.color = "red";
-    resultDiv.innerText = "❌ กรุณาระบุจำนวนยอดเงินในซองอั่งเปาให้ถูกต้อง";
+    resultDiv.innerText = "❌ กรุณาระบุจำนวนเงินให้ถูกต้อง";
     return;
   }
 
@@ -125,13 +123,12 @@ function processTopup() {
   })
   .then(() => {
     resultDiv.style.color = "orange";
-    resultDiv.innerText = `⏳ แจ้งเงินสำเร็จ! ระบบกำลังส่งซองจำนวน ${amount} บาท ให้เจ้าของร้านตรวจสอบ โปรดรอเติมเครดิตใน 5-15 นาที`;
+    resultDiv.innerText = `⏳ แจ้งเงินสำเร็จ! จำนวน ${amount} บาท โปรดรอเจ้าของร้านตรวจสอบและอนุมัติเครดิต`;
     document.getElementById('truemoney-link').value = "";
     document.getElementById('truemoney-amount').value = "";
   })
   .catch((error) => {
     resultDiv.style.color = "red";
-    resultDiv.innerText = "❌ ไม่สามารถส่งข้อมูลอั่งเปาได้เนื่องจากระบบขัดข้อง";
-    console.error(error);
+    resultDiv.innerText = "❌ เกิดข้อผิดพลาด ไม่สามารถส่งข้อมูลได้";
   });
 }
