@@ -1,4 +1,4 @@
-// 1. ประกาศตัวแปรเงินในระบบไว้บนสุด เพื่อไม่ให้เกิดข้อผิดพลาด Cannot access before initialization
+// 1. ประกาศตัวแปรเงินในระบบไว้บนสุด
 let userBalance = 0;
 
 // 2. ตั้งค่าการเชื่อมต่อ Firebase
@@ -36,10 +36,10 @@ function showSection(section) {
   }
 }
 
-// ฟังก์ชันดึงจำนวนสต็อกสินค้าจาก Firebase
+// 🛒 ฟังก์ชันดึงสต็อก (ปรับมาใช้ productid พิมพ์เล็กตาม Firebase ของคุณแล้ว)
 function updateStockDisplay(productId) {
   db.collection("accounts")
-    .where("productId", "==", productId)
+    .where("productid", "==", productId) // 🔥 แก้จุดนี้เป็นพิมพ์เล็กตรงตามหลังบ้านเป๊ะๆ
     .where("status", "==", "available")
     .get()
     .then((querySnapshot) => {
@@ -54,17 +54,15 @@ function updateStockDisplay(productId) {
     });
 }
 
-// ฟังก์ชันเมื่อกดปุ่มซื้อรหัสสินค้า
+// 🛍️ ฟังก์ชันกดซื้อสินค้า (ปรับให้รองรับตัวพิมพ์เล็ก)
 function buyProduct(productId, productName, price) {
-  // ตรวจเช็กเงินในกระเป๋าก่อน
   if (userBalance < price) {
     alert(`❌ ยอดเงินของคุณไม่เพียงพอ!\nสินค้านี้ราคา ${price} ฿\nแต่คุณมีเงินในระบบเพียง ${userBalance} ฿`);
     return;
   }
 
-  // ค้นหารหัสเกมในตู้คลังข้อมูล accounts
   db.collection("accounts")
-    .where("productId", "==", productId)
+    .where("productid", "==", productId) // 🔥 แก้จุดนี้เป็นพิมพ์เล็กเหมือนกันครับ
     .where("status", "==", "available")
     .limit(1)
     .get()
@@ -78,7 +76,6 @@ function buyProduct(productId, productName, price) {
         const accountId = doc.id;
         const accountData = doc.data();
 
-        // เปลี่ยนสถานะสินค้าเป็นขายแล้ว
         db.collection("accounts").doc(accountId).update({
           status: "sold"
         }).then(() => {
